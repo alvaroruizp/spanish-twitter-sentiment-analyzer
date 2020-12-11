@@ -1,0 +1,7 @@
+
+/data
+tweetsdip.csv
+*.csv
+*.png
+*.hdf5
+*.xml
