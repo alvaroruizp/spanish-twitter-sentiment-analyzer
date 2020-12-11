@@ -1,2 +1,2 @@
-# spanish-twitter-sentiment-analyzer
-Sentiment Analyzer para Twitter en español mediante NLP y machine learning
+# Spanish Twitter Sentiment Analyzer
+Análisis de sentimiento para tweets en español mediante NLP y machine learning.
