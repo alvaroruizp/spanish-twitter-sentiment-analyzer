@@ -261,7 +261,7 @@ def lemmatizer(df):
 
 # Main function
 
-def transform_tweets(df):
+def transform_tweets(tweet):
     """ Sustituimos menciones, hashtags, link y emojis
         Normalizamos risas
         Eliminamos letras repetidas
@@ -270,19 +270,19 @@ def transform_tweets(df):
         Eliminamos stopwords
         Lematizamos"""
 
-    df = remove_links(df)
-    df = remove_punctuation_space(df)
-    df = remove_mentions(df)
-    df = remove_hashtags(df)
-    df = transform_icons(df)
-    df = sep_emojis(df)
-    df = transform_emoji(df)
-    df = normalize_laughts(df)
-    df = remove_punctuation(df)
-    df = remove_repeated_vocals(df)
-    df = fix_abbr(df)
-    df = remove_stopwords(df)
+    df = remove_links(tweet)
+    df = remove_punctuation_space(tweet)
+    df = remove_mentions(tweet)
+    df = remove_hashtags(tweet)
+    df = transform_icons(tweet)
+    df = sep_emojis(tweet)
+    df = transform_emoji(tweet)
+    df = normalize_laughts(tweet)
+    df = remove_punctuation(tweet)
+    df = remove_repeated_vocals(tweet)
+    df = fix_abbr(tweet)
+    df = remove_stopwords(tweet)
     # df = stem(df) #Opción para stemizar
-    df = lemmatizer(df)
+    df = lemmatizer(tweet)
 
-    return df
+    return tweet
