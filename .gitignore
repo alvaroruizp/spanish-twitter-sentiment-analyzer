@@ -6,3 +6,5 @@ tweetsdip.csv
 *.png
 *.hdf5
 *.xml
+df.model
+df_stem.model
