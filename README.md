@@ -25,3 +25,7 @@ Para el tratamiento de los datos se han elaborado script que reducen al mínimo 
 En la construcción de modelos se han optado por redes neuronales de capas GRU, RNN con capas LSTM, RNN bidireccionales y un modelo de red neuronal convolucional 1D. También se han valorado mediante la técnica de CountVectorizer e TFIFD la regresión logística, random forest y SVM como clasificadores. El algoritmo que mejor accuracy ha obtenido ha sido la regresión logística mediante Count Vectorizer, con más del 76% de acierto.
 
 Finalmente, el modelo funciona bien sin tener que haber recurrido a la hiperparametrización, lo que indica que el rendimiento podría ser incluso mejor. Aun así, dada la baja calidad del dataset, el modelo llega a confundir con frecuencia entre negativo-neutro y positivo-neutro, no así entre tweets negativo-positivo. Estas limitaciones intentarán solventarse en próximas iteraciones del modelo.
+
+Para cualquier cosa, no dudes en contactarme.
+
+¡Gracias!
