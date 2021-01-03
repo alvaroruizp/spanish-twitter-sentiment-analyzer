@@ -1,26 +1,25 @@
 # Imports
 import re
-import csv
 import numpy as np
-from emosent import get_emoji_sentiment_rank
 import emoji
-import nltk
-from nltk.corpus import stopwords
+import pickle
 import spacy
 import es_core_news_md
+from nltk.stem.snowball import SnowballStemmer
+from spellchecker import SpellChecker
 
 spacy.prefer_gpu()
 nlp = es_core_news_md.load()
 
-# Creamos diccionario de stopwords
-nltk.download('stopwords')
-spanish_stopwords = stopwords.words('spanish')
-non_stopwords = ['no', 'ni', 'poco', 'mucho', 'nada', 'muchos', 'muy', 'nosotros',
-                 'nosotras', 'vosotros', 'vosotras', 'ellos', 'ellas', 'ella', 'él', 'tu', 'tú', 'yo',
-                 'pero', 'hasta', 'contra', 'por']
-spanish_stopwords = [word for word in stopwords.words('spanish') if word not in non_stopwords]
+# Cargamos diccionario de stopwords
+SPANISH_STOPWORDS = pickle.load(open('scripts/stopwords_es', 'rb'))
+EMOJI_SENTIMENT_DICT = pickle.load(open('scripts/emoji_dict', 'rb'))
+
+# Creamos diccionario para corregir palabras
+spell = SpellChecker(language='es', distance=1)
 
 # Scripts
+
 def remove_punctuation_space(df):
     """Eliminamos signos de puntuación sin
     sustituir por espacio."""
@@ -152,6 +151,11 @@ def transform_icons(df):
             word_list.append(word)
     return " ".join(word_list)
 
+def remove_eur(df):
+    """Script para identificar divisas"""
+    wlist = ['{eur}' if ('€' in word) | ('euro' in word) | ('$' in word) else word for word in df.split()]
+    return " ".join(wlist)
+
 
 def sep_emojis(df):
     """Separamos emojis que vengan juntos"""
@@ -159,7 +163,7 @@ def sep_emojis(df):
     for token in df.split():
         new_word = []
         for letra in token:
-            if letra in emoji.UNICODE_EMOJI['es']:
+            if letra in emoji.UNICODE_EMOJI: #emoji.UNICODE_EMOJI['es'] para version en castellano
                 words_list.append(letra)
             else:
                 new_word.append(letra)
@@ -171,9 +175,9 @@ def sep_emojis(df):
 
 ## Scripts para el manejo de emojis en texto
 
-def _build_dict_from_csv(csv_path):
-    """Crea un diccionario de emojis.
-    Fork basado en emosent-py de Fintel Labs Inc. """
+"""def _build_dict_from_csv(csv_path):
+    #Crea un diccionario de emojis.
+    #Fork basado en emosent-py de Fintel Labs Inc.
 
     emoji_sentiment_rankings = {}
 
@@ -194,15 +198,17 @@ def _build_dict_from_csv(csv_path):
                 'sentiment': [negative, neutral, positive]
             }
 
-    return emoji_sentiment_rankings
+    return emoji_sentiment_rankings"""
 
 
-
-EMOJI_SENTIMENT_DICT = _build_dict_from_csv('data\Emoji_Sentiment_Data_v1.0.csv')
+#EMOJI_SENTIMENT_DICT = _build_dict_from_csv('data/Emoji_Sentiment_Data_v1.0.csv')
 
 def char_is_emoji(character):
     """Devuelve true/false si es emoji"""
-    return character in emoji.UNICODE_EMOJI['es']
+    try:
+        return character in emoji.UNICODE_EMOJI['es']
+    except:
+        return character in emoji.UNICODE_EMOJI
 
 
 def get_emoji_rank(emoji):
@@ -232,11 +238,15 @@ def transform_emoji(df):
 
 def remove_stopwords(df):
     """Script para eliminar stopwords del texto"""
-    return " ".join([word for word in df.split() if word not in spanish_stopwords])
+    return " ".join([word for word in df.split() if word not in SPANISH_STOPWORDS])
 
+def correcting_words(df):
+#    """Script para corregir palabras mal escritas"""
+    misspelled = spell.unknown(df.split())
+    return " ".join([spell.correction(word) if word in misspelled else word for word in df.split()])
 
 def lemmatizer(df):
-    """Lematización de palabras en castellano"""
+    #Lematización de palabras en castellano
     word_list = []
     doc = nlp(df)
     for tok in doc:
@@ -259,30 +269,35 @@ def lemmatizer(df):
     return " ".join([word for word in word_list if (word != '{') and (word != '}')])
 
 
+# Stemmizamos
+def stem(df):
+    stemmer = SnowballStemmer('spanish')
+    return " ".join([stemmer.stem(word) for word in df.split()])
+
+
+
 # Main function
+def transform_tweets(df, mode='lemma'):
+    """ Put it all together"""
+    df = remove_links(df)
+    df = remove_punctuation_space(df)
+    df = remove_mentions(df)
+    df = remove_hashtags(df)
+    df = remove_eur(df)
+    df = transform_icons(df)
+    df = sep_emojis(df)
+    df = transform_emoji(df)
+    df = normalize_laughts(df)
+    df = remove_punctuation(df)
+    df = remove_repeated_vocals(df)
+    df = correcting_words(df)
+    df = fix_abbr(df)
+    df = remove_stopwords(df)
+    if mode == 'lemma':
+        df = lemmatizer(df)
+    elif mode == 'stem':
+        df = stem(df)
+    else:
+        raise TypeError('Invalid mode. Must be "lemma" or "stem"')
 
-def transform_tweets(tweet):
-    """ Sustituimos menciones, hashtags, link y emojis
-        Normalizamos risas
-        Eliminamos letras repetidas
-        Sustituimos signos de puntuacion
-        Corregimos abreviaciones
-        Eliminamos stopwords
-        Lematizamos"""
-
-    df = remove_links(tweet)
-    df = remove_punctuation_space(tweet)
-    df = remove_mentions(tweet)
-    df = remove_hashtags(tweet)
-    df = transform_icons(tweet)
-    df = sep_emojis(tweet)
-    df = transform_emoji(tweet)
-    df = normalize_laughts(tweet)
-    df = remove_punctuation(tweet)
-    df = remove_repeated_vocals(tweet)
-    df = fix_abbr(tweet)
-    df = remove_stopwords(tweet)
-    # df = stem(df) #Opción para stemizar
-    df = lemmatizer(tweet)
-
-    return tweet
+    return df
