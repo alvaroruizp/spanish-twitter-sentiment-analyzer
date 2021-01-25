@@ -8,7 +8,7 @@ model = pickle.load(open('models/model_lr.model', 'rb')) # o model_lr_stem para 
 
 
 if __name__ == '__main__':
-    predict_tweet("""Este va a ser un tweet positivo
+    print(predict_tweet("""Este va a ser un tweet positivo
     porque el predictor va a acertar
-    perfectamente con su clase""", tokenizer=tokenizer, model=model)
+    perfectamente con su clase""", tokenizer=tokenizer, model=model))
 

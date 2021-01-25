@@ -1,6 +1,7 @@
 /.ipynb_checkpoints
 /.idea
 /data
+/beta
 tweetsdip.csv
 *.csv
 *.png

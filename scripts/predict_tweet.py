@@ -23,11 +23,11 @@ def get_label_predict(probas, i=0.5):
 def predict_tweet(tweet, tokenizer, model):
     """Script para predecir"""
     tweet = transform_tweets(tweet, mode="lemma") # O mode='stem' para stemización
-    print('Predict_tweet:', tweet)
+    #print('Predict_tweet:', tweet)
 
     sentiment = ['Negativo', 'Neutro-negativo', 'Neutro', 'Neutro-positivo', 'Positivo']
     X_pred = tokenizer.transform([tweet])
 
-    print(model.predict_proba(X_pred))
+    #print(model.predict_proba(X_pred))
     return {'proba': list(model.predict_proba(X_pred)[0]),
             'sentiment': sentiment[get_label_predict(model.predict_proba(X_pred)[0])]}
